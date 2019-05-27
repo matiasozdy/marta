@@ -58,27 +58,36 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
 
     #List pods using the api. Need to find a way to grep. Need to try-catch.
     if command.startswith('pods'):
-        ret = v1.list_namespaced_pod('default', watch=False)
-        resp = ['Pod - Status - Start Time']
-        for i in ret.items:
-            resp.append(i.metadata.name + ' - ' + i.status.phase + ' - ' + i.status.start_time.strftime("%d-%b-%Y (%H:%M)"))
-        response = "\n".join(resp)
+        try:
+            ret = v1.list_namespaced_pod('default', watch=False)
+            resp = ['Pod - Status - Start Time']
+            for i in ret.items:
+                resp.append(i.metadata.name + ' - ' + i.status.phase + ' - ' + i.status.start_time.strftime("%d-%b-%Y (%H:%M)"))
+            response = "\n".join(resp)
+        except:
+            response = "An error has occured trying to list pods"
     #################################
     #Get pod logs using the api
     if command.startswith('logs'):
-        if command.split(' ', 2)[1].isnumeric():
-            response = v1.read_namespaced_pod_log(command.split(' ', 2)[2], 'default', tail_lines=command.split(' ', 2)[1])
-        else:
-            response = v1.read_namespaced_pod_log(command.split(' ', 2)[1], 'default', tail_lines=50)
+        try:
+            if command.split(' ', 2)[1].isnumeric():
+                response = v1.read_namespaced_pod_log(command.split(' ', 2)[2], 'default', tail_lines=command.split(' ', 2)[1])
+            else:
+                response = v1.read_namespaced_pod_log(command.split(' ', 2)[1], 'default', tail_lines=50)
+        except:
+            response = "An error has occured, maybe no arguments where provided after logs?"
 
     ################################
     #Get pod events
     if command.startswith('event'):
-        resp = ['Events:']
-        ret = v1.list_namespaced_event('default', field_selector='involvedObject.name=' + command.split(None, 1)[1])
-        for i in ret.items:
-            resp.append(i.message)
-        response = "\n".join(resp)
+        try:
+            resp = ['Events:']
+            ret = v1.list_namespaced_event('default', field_selector='involvedObject.name=' + command.split(None, 1)[1])
+            for i in ret.items:
+                resp.append(i.message)
+            response = "\n".join(resp)
+        except:
+            response = "An error has occured or no events found for pod"
     ################################
    
     # Sends the response back to the channel
