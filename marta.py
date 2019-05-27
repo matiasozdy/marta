@@ -102,7 +102,7 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
 if __name__ == "__main__":
 
     #If is for local testing, read the kubeconfig file
-    if os.environ.get(ENV) == 'dev':
+    if os.environ.get('ENV') == 'dev':
         print("Using local kubeconfig file")
         config.load_kube_config()
     else:
