@@ -15,9 +15,12 @@ spec:
       containers:
       - image: matiasozdy/marta:latest
         name: marta
-        envFrom:
-        - configMapRef:
-            name: marta-slack
+        env:
+          - name: SLACK_BOT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: marta-chatbot-token
+                key: SLACK_BOT_TOKEN
 ---
 apiVersion: v1
 kind: Service
