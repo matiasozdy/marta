@@ -67,7 +67,7 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
     #Get pod logs using the api
     if command.startswith('logs'):
         if command.split(' ', 2)[1].isnumeric():
-            response = v1.read_namespaced_pod_log(command.split(' ', 2)[2], 'default', tail_lines= + command.split(' ', 2)[1])
+            response = v1.read_namespaced_pod_log(command.split(' ', 2)[2], 'default', tail_lines=command.split(' ', 2)[1])
         else:
             response = v1.read_namespaced_pod_log(command.split(' ', 2)[1], 'default', tail_lines=50)
 
