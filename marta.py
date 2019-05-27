@@ -100,10 +100,14 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
 
 
 if __name__ == "__main__":
-    #This is for local testing using kube_config
-    config.load_kube_config()
-    #Actually loading kube_token from inside the cluster
-    #config.load_incluster_config()
+
+    #If is for local testing, read the kubeconfig file
+    if os.environ.get(ENV) == 'dev':
+        config.load_kube_config()
+    else:
+    #Actually loading kube_token from inside the cluster if it's a pod
+        config.load_incluster_config()
+
     if slack_client.rtm_connect(with_team_state=False):
         print("Marta connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
