@@ -63,7 +63,11 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
             ret = v1.list_namespaced_pod(NAMESPACE, watch=False)
             resp = ['Pod - Status - Start Time']
             for i in ret.items:
-                resp.append(i.metadata.name + ' - ' + i.status.phase + ' - ' + i.status.start_time.strftime("%d-%b-%Y (%H:%M)"))
+                if len(command.split(' ', 2)) > 1:
+                    if command.split(' ', 2)[1] in i.metadata.name:
+                        resp.append(i.metadata.name + ' - ' + i.status.phase + ' - ' + i.status.start_time.strftime("%d-%b-%Y (%H:%M)"))
+                else:
+                    resp.append(i.metadata.name + ' - ' + i.status.phase + ' - ' + i.status.start_time.strftime("%d-%b-%Y (%H:%M)"))
             response = "\n".join(resp)
         except:
             response = "An error has occured trying to list pods"
