@@ -53,7 +53,7 @@ def handle_command(command, channel):
     if command.startswith(EXAMPLE_COMMAND):
         response = """I can provide you with diferent information from the current k8s cluster im running\n
 pods [part of name] -> Ill provide you a list of available pods\n
-describe $podname -> Ill output the pod description\n
+event $podname -> Ill output the pod events\n
 logs [numlines] $podname -> Ill tail you the logs\n"""
 
     #List pods using the api. Need to find a way to grep. Need to try-catch.
