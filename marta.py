@@ -67,13 +67,13 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
     #Get pod logs using the api
     if command.startswith('logs'):
         if command.split(' ', 2)[1].isnumeric():
-            response = v1.read_namespaced_pod_log(command.split(' ', 2)[2], 'default', 'tail_lines=' + command.split(' ', 2)[1])
+            response = v1.read_namespaced_pod_log(command.split(' ', 2)[2], 'default', tail_lines= + command.split(' ', 2)[1])
         else:
-            response = v1.read_namespaced_pod_log(command.split(' ', 2)[2], 'default', 'tail_lines=50')
+            response = v1.read_namespaced_pod_log(command.split(' ', 2)[1], 'default', tail_lines=50)
 
     ################################
     #Get pod events
-    if command.startswith('desc'):
+    if command.startswith('event'):
         resp = ['Events:']
         ret = v1.list_namespaced_event('default', field_selector='involvedObject.name=' + command.split(None, 1)[1])
         for i in ret.items:
