@@ -103,6 +103,7 @@ if __name__ == "__main__":
 
     #If is for local testing, read the kubeconfig file
     if os.environ.get(ENV) == 'dev':
+        print("Using local kubeconfig file")
         config.load_kube_config()
     else:
     #Actually loading kube_token from inside the cluster if it's a pod
