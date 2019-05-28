@@ -1,9 +1,11 @@
 import os
 import time
 import re
+import pytz
+from prettytable import PrettyTable
 from slackclient import SlackClient
 from kubernetes import client, config
-
+from datetime import datetime
 # instantiate Slack client
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 # starterbot's user ID in Slack: value is assigned after the bot starts up
@@ -14,7 +16,6 @@ RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 EXAMPLE_COMMAND = "help"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 NAMESPACE = "default"
-
 def parse_bot_commands(slack_events):
     """
         Parses a list of events coming from the Slack RTM API to find bot commands.
@@ -61,15 +62,20 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
     if command.startswith('pods'):
         try:
             ret = v1.list_namespaced_pod(NAMESPACE, watch=False)
-            resp = ['Pod - Status - Start Time']
+            #resp = ['Pod - Status - Start Time']
+            resp = PrettyTable(['Pod', 'Status', 'Start Time'])
             for i in ret.items:
                 if len(command.split(' ', 2)) > 1:
                     if command.split(' ', 2)[1] in i.metadata.name:
-                        resp.append(i.metadata.name + ' - ' + i.status.phase + ' - ' + i.status.start_time.strftime("%d-%b-%Y (%H:%M)"))
+                        resp.add_row([i.metadata.name, i.status.phase, i.status.start_time.strftime("%d-%b-%Y (%H:%M)")])
                 else:
-                    resp.append(i.metadata.name + ' - ' + i.status.phase + ' - ' + i.status.start_time.strftime("%d-%b-%Y (%H:%M)"))
-            response = "\n".join(resp)
-        except:
+                    today = datetime.now(pytz.utc)
+                    resp.add_row([i.metadata.name, i.status.phase, str(((today - i.status.start_time.replace(tzinfo=pytz.utc)).seconds / 60)) + ' Mins'])
+                    print(type(today - i.status.start_time.replace(tzinfo=pytz.utc)))
+            #response = "\n".join(resp)
+            response = str(resp)
+        except AssertionError as e:
+            print("Error found: " + e)
             response = "An error has occured trying to list pods"
     #################################
     #Get pod logs using the api
@@ -94,12 +100,34 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
         except:
             response = "An error has occured or no events found for pod"
     ################################
-   
+    #Get deployments or specific deployment image    
+    if command.startswith('deploy'):
+        try:
+            v1apps = client.AppsV1Api()
+            resp = PrettyTable(['Name','Available replicas', 'Desired replicas', 'Image'])
+            if len(command.split(' ', 2)) > 1:
+                ret = v1apps.read_namespaced_deployment(command.split(' ', 2)[1], NAMESPACE)
+                resp.add_row([ret.metadata.name, ret.status.available_replicas, ret.status.replicas, ret.spec.template.spec.containers[0].image])
+            else:
+                ret = v1apps.list_namespaced_deployment(NAMESPACE)
+                for i in ret.items:
+                    today = datetime.now(pytz.utc)
+                    resp.add_row([i.metadata.name, i.status.available_replicas, i.status.replicas, i.spec.template.spec.containers[0].image])
+            response = str(resp)
+        except AssertionError as e:
+            print("Error found: " + e)
+            response = "An error has occured trying to get deployments"
+
+
     # Sends the response back to the channel
+    if len(response) > 4000:
+        ftext=response
+    else:
+        ftext='```' + response + '```'
     slack_client.api_call(
         "chat.postMessage",
         channel=channel,
-        text=response or default_response
+        text=ftext or default_response
     )
 
 
