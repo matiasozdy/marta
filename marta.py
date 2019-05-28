@@ -43,6 +43,7 @@ def handle_command(command, channel):
         Define k8s client constants
     """
     v1 = client.CoreV1Api()
+    v1apps = client.AppsV1Api()
 
     """
         Executes bot command if the command is known
@@ -103,7 +104,6 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
     #Get deployments or specific deployment image    
     if command.startswith('deploy'):
         try:
-            v1apps = client.AppsV1Api()
             resp = PrettyTable(['Name','Available replicas', 'Desired replicas', 'Image'])
             if len(command.split(' ', 2)) > 1:
                 ret = v1apps.read_namespaced_deployment(command.split(' ', 2)[1], NAMESPACE)
