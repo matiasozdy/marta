@@ -57,29 +57,48 @@ def handle_command(command, channel):
         response = """I can provide you with diferent information from the current k8s cluster im running\n
 pods [part of name] -> Ill provide you a list of available pods\n
 event $podname -> Ill output the pod events\n
-logs [numlines] $podname -> Ill tail you the logs\n"""
+logs [numlines] $podname -> Ill tail you the logs\n
+deploy [$deploymentname] -> Will display a list of current deployments with it's image version for container[0]
 
-    #List pods using the api. Need to find a way to grep. Need to try-catch.
+"""
+    
+    #################################
+    #List pods
     if command.startswith('pods'):
         try:
             ret = v1.list_namespaced_pod(NAMESPACE, watch=False)
-            #resp = ['Pod - Status - Start Time']
-            resp = PrettyTable(['Pod', 'Status', 'Start Time'])
+            resp = PrettyTable(['Pod', 'Status', 'Age'])
             for i in ret.items:
+                today = datetime.now(pytz.utc)
+                ###Parse time correctly
+                runningtime = (today - i.status.start_time.replace(tzinfo=pytz.utc))
+                temptime = runningtime.seconds % (24 * 3600)
+                hours = temptime // 3600
+                temptime %= 3600
+                minutes = temptime // 60
+                temptime %= 60
+                secs = temptime
+                if (hours >= 24):
+                    runt = str(runningtime.days) + 'D ' + str(hours) + 'h ' + str(minutes) + 'm ' + str(secs) + 's'
+                else:
+                    runt = str(hours) + 'h ' + str(minutes) + 'm ' + str(secs) + 's'
+                    if ((hours < 1)):
+                        runt = str(minutes) + 'm ' + str(secs) + 's'
+                        if (minutes < 1):
+                            runt = str(secs) + 's'
+
                 if len(command.split(' ', 2)) > 1:
                     if command.split(' ', 2)[1] in i.metadata.name:
-                        resp.add_row([i.metadata.name, i.status.phase, i.status.start_time.strftime("%d-%b-%Y (%H:%M)")])
+                        resp.add_row([i.metadata.name, i.status.phase, runt])
                 else:
-                    today = datetime.now(pytz.utc)
-                    resp.add_row([i.metadata.name, i.status.phase, str(((today - i.status.start_time.replace(tzinfo=pytz.utc)).seconds / 60)) + ' Mins'])
-                    print(type(today - i.status.start_time.replace(tzinfo=pytz.utc)))
-            #response = "\n".join(resp)
+                    resp.add_row([i.metadata.name, i.status.phase, runt])
             response = str(resp)
         except AssertionError as e:
             print("Error found: " + e)
             response = "An error has occured trying to list pods"
+
     #################################
-    #Get pod logs using the api
+    #Get pod logs
     if command.startswith('logs'):
         try:
             if command.split(' ', 2)[1].isnumeric():
@@ -100,6 +119,7 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
             response = "\n".join(resp)
         except:
             response = "An error has occured or no events found for pod"
+
     ################################
     #Get deployments or specific deployment image    
     if command.startswith('deploy'):
@@ -118,7 +138,7 @@ logs [numlines] $podname -> Ill tail you the logs\n"""
             print("Error found: " + e)
             response = "An error has occured trying to get deployments"
 
-
+    ################################
     # Sends the response back to the channel
     if len(response) > 4000:
         ftext=response
