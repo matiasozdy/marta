@@ -13,7 +13,7 @@ spec:
     spec:
       serviceaccountname: marta-chatbot
       containers:
-      - image: matiasozdy/marta:latest
+      - image: marta:latest
         name: marta
         env:
           - name: SLACK_BOT_TOKEN
