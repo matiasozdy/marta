@@ -4,8 +4,11 @@ kind: ClusterRole
    name: pods-list
  rules:
  - apiGroups: [""]
-   resources: ["pods"]
-   verbs: ["list"]
+   resources: ["pods", "pods/log", "deployments"]
+   verbs: ["get", "list"]
+ - apiGroups: ["extensions","apps"]
+   resources: ["deployments"]
+   verbs: ["get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
