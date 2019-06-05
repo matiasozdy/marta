@@ -1,14 +1,14 @@
 kind: ClusterRole
- apiVersion: rbac.authorization.k8s.io/v1
- metadata:
-   name: pods-list
- rules:
- - apiGroups: [""]
-   resources: ["pods", "pods/log", "deployments"]
-   verbs: ["get", "list"]
- - apiGroups: ["extensions","apps"]
-   resources: ["deployments"]
-   verbs: ["get", "list"]
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+ name: pods-list
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "deployments"]
+    verbs: ["get", "list"]
+  - apiGroups: ["extensions","apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -23,7 +23,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: marta-chatbot # Name is case sensitive
-  apiGroup: rbac.authorization.k8s.io
+  apiGroup:
 roleRef:
   kind: Role #this must be Role or ClusterRole
   name: pods-list # this must match the name of the Role or ClusterRole you wish to bind to
