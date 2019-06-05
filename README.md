@@ -4,29 +4,26 @@ Marta is a slack chatbot that will fetch some readonly values from the Kubernete
 ### Creating bot in slack
 Please refer to https://get.slack.help/hc/en-us/articles/115005265703-Create-a-bot-for-your-workspace
 ### Installing roles
-kubectl create -f roles.yaml
+kubectl create -f k8s/roles.yaml
 ### Generating secrets
 TODO
 Create a secret for the SLACK_BOT_TOKEN inside k8s.
 ```shell
 echo -n 'SLACK_TOKEN' | base64
 ```
-with the output of that command, create a yaml for the secret.
+with the output of that command, replace in the secret.yaml the correct value for SLACK_BOT_TOKEN.
 ```shell
-apiVersion: v1
-kind: Secret
-metadata:
-  name: marta-chatbot-token
-type: Opaque
+...
 data:
-  SLACK_BOT_TOKEN: YWRtaW4=
+  SLACK_BOT_TOKEN: REPLACEME
+...
 ```
 then run
 ```shell
-kubectl create -f secret.yaml
+kubectl create -f k8s/secret.yaml
 ```
 ### Running it
-kubectl create -f deployment.yaml service.yaml
+kubectl create -f k8s/deployment.yaml k8s/service.yaml
 ### Running it locally with virtualenv
 Make sure you have python installed, then:
 ```shell
