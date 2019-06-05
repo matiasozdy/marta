@@ -25,6 +25,6 @@ subjects:
   name: marta-chatbot # Name is case sensitive
   apiGroup:
 roleRef:
-  kind: Role #this must be Role or ClusterRole
+  kind: ClusterRole #this must be Role or ClusterRole
   name: pods-list # this must match the name of the Role or ClusterRole you wish to bind to
   apiGroup: rbac.authorization.k8s.io
