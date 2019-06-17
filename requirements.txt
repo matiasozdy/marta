@@ -1,3 +1,5 @@
 slackclient
 requests
 kubernetes
+prettytable
+pytz
